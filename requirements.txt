@@ -5,3 +5,6 @@ shapely
 fiona
 pyproj
 rasterio
+PyQt5
+pyqtgraph
+pyinstaller
