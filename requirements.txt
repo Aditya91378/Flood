@@ -8,3 +8,4 @@ rasterio
 PyQt5
 pyqtgraph
 pyinstaller
+scipy
