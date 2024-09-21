@@ -4,8 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
-from scipy.linalg import eig
+from PyQt5.QtGui import QPixmap, QImage
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from io import BytesIO
+from PIL import Image
 
 class FloodPredictionApp(QWidget):
     def __init__(self):
@@ -22,7 +24,7 @@ class FloodPredictionApp(QWidget):
         # Shapefile Input
         self.label_shapefile = QLabel("Select Shapefile for Study Area:")
         layout.addWidget(self.label_shapefile)
-        
+
         self.file_input = QLineEdit(self)
         layout.addWidget(self.file_input)
 
@@ -129,12 +131,20 @@ class FloodPredictionApp(QWidget):
             plt.title('Flood Risk Prediction Map')
             plt.xlabel('Longitude')
             plt.ylabel('Latitude')
-            
-            # Save plot to a file
-            plt.savefig('flood_risk_map.png')
 
-            # Display the result image inside the GUI
-            pixmap = QPixmap('flood_risk_map.png')
+            # Convert plot to a QPixmap to display in PyQt5 GUI
+            buf = BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            img = Image.open(buf)
+            img = img.convert("RGB")
+
+            # Convert to QImage for QPixmap
+            data = img.tobytes("raw", "RGB")
+            qimg = QImage(data, img.size[0], img.size[1], QImage.Format_RGB888)
+            pixmap = QPixmap.fromImage(qimg)
+
+            # Display the image in the QLabel
             self.image_label.setPixmap(pixmap)
             self.image_label.setScaledContents(True)  # Ensure the image fits the label
             self.result_label.setText("Flood risk prediction completed!")
