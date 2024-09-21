@@ -95,33 +95,33 @@ class FloodPredictionApp(QWidget):
                 "historical_floods": np.random.randint(0, 2, len(gdf))
             }
 
-            # AHP Weights
-            criteria_weights = {
-                "elevation": 0.2,
-                "slope": 0.15,
-                "proximity_to_rivers": 0.3,
-                "land_cover": 0.1,
-                "rainfall": 0.2,
-                "historical_floods": 0.05
-            }
-
-            # Example pairwise comparison matrix
+            # Correct Pairwise Comparison Matrix for AHP (6 factors: Elevation, Slope, Rivers, Land Cover, Rainfall, Historical Floods)
             pairwise_matrix = np.array([
-                [1, 3, 0.5, 2],
-                [1/3, 1, 1/7, 1/3],
-                [2, 7, 1, 5],
-                [0.5, 3, 1/5, 1]
+                [1, 2, 4, 1/2, 3, 5],    # Elevation
+                [1/2, 1, 3, 1/3, 2, 4],  # Slope
+                [1/4, 1/3, 1, 1/5, 1, 3], # Rivers
+                [2, 3, 5, 1, 4, 6],      # Land Cover
+                [1/3, 1/2, 1, 1/4, 1, 2], # Rainfall
+                [1/5, 1/4, 1/3, 1/6, 1/2, 1] # Historical Floods
             ])
-
+            
             # Calculate AHP weights and CR
             weights, cr = self.calculate_ahp_weights(pairwise_matrix)
             print("AHP Weights:", weights)
             print("Consistency Ratio (CR):", cr)
 
-            # Calculate flood risk
+
+            # Ensure CR is below 0.1 for consistency
+            if cr > 0.1:
+                self.result_label.setText("AHP matrix is inconsistent, CR > 0.1")
+                return
+            
+             # Calculate flood risk using the AHP weights
             flood_risk_scores = np.zeros(len(gdf))
-            for criterion, weight in criteria_weights.items():
-                flood_risk_scores += np.array(flood_risk_data[criterion]) * weight
+            factors = ['elevation', 'slope', 'proximity_to_rivers', 'land_cover', 'rainfall', 'historical_floods']
+
+            for idx, factor in enumerate(factors):
+                flood_risk_scores += np.array(flood_risk_data[factor]) * weights[idx]
 
             gdf['flood_risk'] = flood_risk_scores
 
