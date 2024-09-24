@@ -1,3 +1,4 @@
+import rasterio  # Add this import at the top of your code
 import sys
 import geopandas as gpd
 import numpy as np
@@ -32,6 +33,17 @@ class FloodPredictionApp(QWidget):
         self.browse_button.clicked.connect(self.browse_shapefile)
         layout.addWidget(self.browse_button)
 
+        # Add this inside the initUI method to create the DEM input field
+        self.label_dem = QLabel("Select DEM TIFF File (Optional):")
+        layout.addWidget(self.label_dem)
+
+        self.dem_input = QLineEdit(self)
+        layout.addWidget(self.dem_input)
+
+        self.browse_dem_button = QPushButton('Browse DEM', self)
+        self.browse_dem_button.clicked.connect(self.browse_dem)
+        layout.addWidget(self.browse_dem_button)
+
         # Predict Button
         self.predict_button = QPushButton('Predict Flood Risk', self)
         self.predict_button.clicked.connect(self.predict_flood_risk)
@@ -47,6 +59,16 @@ class FloodPredictionApp(QWidget):
         layout.addWidget(self.image_label)
 
         self.setLayout(layout)
+
+    # Add this method to handle DEM file browsing
+    def browse_dem(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        # Modify this line in the browse_dem method to reflect the correct file type
+        dem_file, _ = QFileDialog.getOpenFileName(self, "Select DEM TIFF File", "", "TIFF Files (*.tif);;All Files (*)", options=options)
+
+        if dem_file:
+            self.dem_input.setText(dem_file)
 
     def browse_shapefile(self):
         options = QFileDialog.Options()
@@ -77,6 +99,7 @@ class FloodPredictionApp(QWidget):
 
     def predict_flood_risk(self):
         shapefile_path = self.file_input.text()
+        dem_file_path = self.dem_input.text()  # Get the DEM input
         if not shapefile_path:
             self.result_label.setText("Please select a shapefile!")
             return
@@ -85,9 +108,20 @@ class FloodPredictionApp(QWidget):
             # Load the shapefile
             gdf = gpd.read_file(shapefile_path)
 
+                # Load DEM data if provided, otherwise use random data
+            if dem_file_path:
+                with rasterio.open(dem_file_path) as dem:
+                    elevation_data = dem.read(1)  # Read the first band of the DEM
+                    elevation_data = elevation_data.flatten()  # Flatten to 1D array if needed
+                    if len(elevation_data) < len(gdf):
+                        elevation_data = np.pad(elevation_data, (0, len(gdf) - len(elevation_data)), mode='constant')  # Pad with zeros if necessary
+            else:
+                elevation_data = np.random.randint(500, 650, len(gdf))  # Random data if DEM not provided
+
+
             # Sample Data for each sub-district (replace with actual data or add more fields for user input)
             flood_risk_data = {
-                "elevation": np.random.randint(500, 650, len(gdf)),  # Example random data
+                "elevation": elevation_data,  # Example random data
                 "slope": np.random.randint(1, 20, len(gdf)),
                 "proximity_to_rivers": np.random.randint(50, 500, len(gdf)),
                 "land_cover": np.random.randint(1, 3, len(gdf)),
