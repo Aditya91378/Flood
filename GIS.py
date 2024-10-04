@@ -3,7 +3,7 @@ import sys
 import geopandas as gpd
 import numpy as np
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit,QTextEdit
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -50,7 +50,7 @@ class FloodPredictionApp(QWidget):
         layout.addWidget(self.predict_button)
 
         # Result Label
-        self.result_label = QLabel("", self)
+        self.result_label =QTextEdit(self)
         self.result_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.result_label)
 
