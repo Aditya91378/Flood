@@ -20,9 +20,9 @@ smoothed_data = gaussian_filter(dem_data, sigma=1)
 flood_risk_zones = np.zeros_like(smoothed_data)
 
 # Set flood risk zones based on elevation thresholds (modified logic)
-flood_risk_zones[(smoothed_data < 300) & (smoothed_data > 0)] = 3  # Low elevation, High flood risk
-flood_risk_zones[(smoothed_data >= 300) & (smoothed_data < 600)] = 2  # Mid elevation, Moderate risk
-flood_risk_zones[smoothed_data >= 600] = 1  # High elevation, Low flood risk
+flood_risk_zones[(smoothed_data < 570) & (smoothed_data > 0)] = 3  # Low elevation, High flood risk
+flood_risk_zones[(smoothed_data >= 570) & (smoothed_data < 700)] = 2  # Mid elevation, Moderate risk
+flood_risk_zones[smoothed_data >= 700] = 1  # High elevation, Low flood risk
 
 # Set areas where the original DEM was negative to NaN in flood risk zones
 flood_risk_zones[negative_mask] = np.nan  # Set flood risk zones to NaN where DEM was negative
